@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân tích Dự án Kiều by KITA Group by Trọng Khải - 0902 79 8800</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Nền: #F8F5F2, Chữ chính: #3D3B38, Chữ phụ: #7A7773, Nhấn: #C8A464, Nhấn phụ: #EAE3DC) -->
+    <!-- Application Structure Plan: Tôi đã thiết kế ứng dụng này theo cấu trúc dashboard theo chủ đề thay vì theo cấu trúc tuyến tính của báo cáo gốc. Cách tiếp cận này cho phép người dùng nhanh chóng điều hướng đến phần thông tin họ quan tâm nhất. Luồng người dùng bắt đầu với một tổng quan cấp cao, sau đó đi sâu vào các khía cạnh cụ thể như vị trí, tài chính, và rủi ro. Cấu trúc này tối ưu hóa việc ra quyết định bằng cách trình bày các phân tích so sánh và các điểm dữ liệu quan trọng một cách trực quan và dễ tiếp cận, giúp người dùng (nhà đầu tư hoặc người mua nhà) nắm bắt được bản chất của dự án một cách hiệu quả. -->
+    <!-- Visualization & Content Choices: 1. Cơ cấu sản phẩm -> Mục tiêu: Thông tin -> Biểu đồ Donut (Chart.js) -> Tương tác: Hover để xem chi tiết -> Lý do: Trực quan hóa tỷ lệ các loại hình căn hộ một cách nhanh chóng. 2. So sánh giá -> Mục tiêu: So sánh -> Biểu đồ cột (Chart.js) -> Tương tác: Hover để xem giá chính xác -> Lý do: Dễ dàng so sánh mức giá của Kiều với các đối thủ cạnh tranh. 3. Tác động Metro -> Mục tiêu: Hiểu tiềm năng -> Sơ đồ timeline (HTML/CSS) -> Tương tác: Tĩnh -> Lý do: Trình bày rõ ràng các giai đoạn hưởng lợi từ hạ tầng. 4. Phân tích SWOT -> Mục tiêu: Tổng hợp -> Lưới 2x2 (HTML/CSS) -> Tương tác: Tĩnh -> Lý do: Cấu trúc hóa các điểm mạnh, yếu, cơ hội, thách thức một cách logic. 5. Máy tính tài chính -> Mục tiêu: Cá nhân hóa -> Form tương tác (JS) -> Lý do: Giúp người dùng tự ước tính dòng tiền. 6. Biểu đồ Rủi ro/Lợi nhuận -> Mục tiêu: Đánh giá -> Biểu đồ Radar (Chart.js) -> Lý do: Trực quan hóa đa chiều các yếu tố đầu tư. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F5F2;
+            color: #3D3B38;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #C8A464;
+            border-bottom-color: #C8A464;
+        }
+        .metric-card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAE3DC;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+        }
+        .btn-policy {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-policy.active {
+            background-color: #C8A464;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[#3D3B38]">Kiều <span class="text-[#C8A464]">by KITA</span></h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link font-medium pb-1">Tổng Quan</a>
+                <a href="#location" class="nav-link font-medium pb-1">Vị Trí</a>
+                <a href="#finance" class="nav-link font-medium pb-1">Tài Chính</a>
+                <a href="#swot" class="nav-link font-medium pb-1">Đánh Giá</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-[#EAE3DC] rounded-md px-3 py-2 text-[#3D3B38]">
+                    <option value="#overview">Tổng Quan</option>
+                    <option value="#location">Vị Trí</option>
+                    <option value="#finance">Tài Chính</option>
+                    <option value="#swot">Đánh Giá</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        
+        <section id="hero" class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Phân Tích Chuyên Sâu Dự Án Kiều by Trọng Khải - 0902 79 8800</h2>
+            <p class="text-lg text-[#7A7773] max-w-3xl mx-auto">Một góc nhìn tương tác về dự án "Boutique Residence" độc quyền tại trái tim Quận 5, TP.HCM.</p>
+        </section>
+
+        <section id="overview" class="scroll-mt-20 mb-16">
+            <h3 class="text-3xl font-bold text-center mb-2">Tổng Quan Dự Án</h3>
+            <p class="text-center text-[#7A7773] mb-10 max-w-3xl mx-auto">Kiều by KITA được định vị là một sản phẩm siêu sang, giới hạn, tập trung vào sự riêng tư và đẳng cấp. Phần này sẽ phân tích các thông số kỹ thuật, cơ cấu sản phẩm và hệ thống tiện ích đặc quyền.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+                <div class="space-y-6">
+                    <div class="metric-card">
+                        <span class="text-4xl font-bold text-[#C8A464]">82</span>
+                        <p class="text-[#7A7773] mt-1">Sản phẩm độc quyền</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="metric-card">
+                            <span class="text-2xl font-bold text-[#C8A464]">27</span>
+                            <p class="text-[#7A7773] mt-1">Tầng cao</p>
+                        </div>
+                        <div class="metric-card">
+                            <span class="text-2xl font-bold text-[#C8A464]">39%</span>
+                            <p class="text-[#7A7773] mt-1">Mật độ xây dựng</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-center mb-4">Phân bổ Cơ Cấu Sản Phẩm</h4>
+                    <div class="chart-container">
+                        <canvas id="productMixChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-8 md:p-12 rounded-2xl border border-[#EAE3DC]">
+                <h4 class="text-2xl font-bold text-center mb-8">Hệ Thống Tiện Ích Nội Khu 5 Sao</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="p-4 rounded-lg bg-[#F8F5F2]">
+                        <div class="text-4xl mb-2">🏊</div>
+                        <h5 class="font-semibold">Hồ bơi Skyview</h5>
+                        <p class="text-sm text-[#7A7773]">Tầm nhìn panorama toàn cảnh thành phố.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-[#F8F5F2]">
+                        <div class="text-4xl mb-2">🥃</div>
+                        <h5 class="font-semibold">Cigar Lounge</h5>
+                        <p class="text-sm text-[#7A7773]">Không gian riêng tư và sang trọng cho quý ông.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-[#F8F5F2]">
+                        <div class="text-4xl mb-2">🏋️</div>
+                        <h5 class="font-semibold">Phòng Gym Hiện Đại</h5>
+                        <p class="text-sm text-[#7A7773]">Trang thiết bị tối tân từ các thương hiệu quốc tế.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-[#F8F5F2]">
+                        <div class="text-4xl mb-2">🌳</div>
+                        <h5 class="font-semibold">Vườn Thiền & Yoga</h5>
+                        <p class="text-sm text-[#7A7773]">Không gian xanh yên tĩnh để tái tạo năng lượng.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="location" class="scroll-mt-20 mb-16 bg-white p-8 md:p-12 rounded-2xl border border-[#EAE3DC]">
+            <h3 class="text-3xl font-bold text-center mb-2">Vị Trí "Kim Cương" & Tiềm Năng Hạ Tầng</h3>
+            <p class="text-center text-[#7A7773] mb-10 max-w-3xl mx-auto">Tọa lạc tại mặt tiền 927 Trần Hưng Đạo, dự án không chỉ sở hữu kết nối giao thông mà còn mang trong mình giá trị di sản văn hóa của Sài Gòn - Chợ Lớn.</p>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div>
+                    <h4 class="font-bold text-xl mb-4">Kết Nối Vượt Trội</h4>
+                    <ul class="space-y-3 text-[#7A7773]">
+                        <li class="flex items-center"><span class="text-[#C8A464] mr-3 text-2xl">📍</span><div><span class="font-semibold text-[#3D3B38]">Quận 1:</span> ~5 phút di chuyển</div></li>
+                        <li class="flex items-center"><span class="text-[#C8A464] mr-3 text-2xl">🚗</span><div><span class="font-semibold text-[#3D3B38]">Đại lộ Võ Văn Kiệt:</span> ~2 phút di chuyển</div></li>
+                        <li class="flex items-center"><span class="text-[#C8A464] mr-3 text-2xl">🏥</span><div><span class="font-semibold text-[#3D3B38]">Bệnh viện Chợ Rẫy, Y Dược:</span> ~10 phút</div></li>
+                        <li class="flex items-center"><span class="text-[#C8A464] mr-3 text-2xl">🛍️</span><div><span class="font-semibold text-[#3D3B38]">Chợ Bến Thành, Nowzone:</span> ~8 phút</div></li>
+                    </ul>
+                     <div class="mt-6 bg-[#F8F5F2] p-4 rounded-lg">
+                        <h5 class="font-semibold text-lg mb-2">Giá trị Di sản Văn hóa</h5>
+                        <p class="text-sm text-[#7A7773]">Vị trí tại trung tâm Chợ Lớn mang lại một "tài sản cảm xúc" độc đáo, kết nối cư dân với lịch sử và văn hóa Sài Gòn, tạo ra giá trị bền vững không thể tìm thấy ở các khu đô thị mới.</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xl mb-4">"Cú Hích" từ Tuyến Metro 3A</h4>
+                    <div class="relative border-l-2 border-[#C8A464] pl-6 space-y-8">
+                        <div class="relative">
+                            <div class="absolute -left-[34px] top-1 w-4 h-4 bg-[#C8A464] rounded-full"></div>
+                            <h5 class="font-semibold text-[#3D3B38]">Giai đoạn Kỳ vọng (Hiện tại - 2026)</h5>
+                            <p class="text-sm text-[#7A7773]">Giá trị BĐS bắt đầu tăng trưởng theo thông tin quy hoạch.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-[34px] top-1 w-4 h-4 bg-[#C8A464] rounded-full"></div>
+                            <h5 class="font-semibold text-[#3D3B38]">Giai đoạn Xây dựng (2026 - 2031)</h5>
+                            <p class="text-sm text-[#7A7773]">"Thời điểm vàng" để các nhà đầu tư dài hạn tích lũy tài sản.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-[34px] top-1 w-4 h-4 bg-[#C8A464] rounded-full"></div>
+                            <h5 class="font-semibold text-[#3D3B38]">Giai đoạn Vận hành (Sau 2031)</h5>
+                            <p class="text-sm text-[#7A7773]">Giá trị và tiềm năng cho thuê tăng trưởng đột biến.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="finance" class="scroll-mt-20 mb-16">
+            <h3 class="text-3xl font-bold text-center mb-2">Giá Bán & Phân Tích Tài Chính</h3>
+             <p class="text-center text-[#7A7773] mb-10 max-w-3xl mx-auto">Với giá từ 150 triệu/m², dự án định vị ở phân khúc cao nhất khu vực. Hãy sử dụng các công cụ dưới đây để phân tích chi tiết hơn.</p>
+            <div class="bg-white p-8 md:p-12 rounded-2xl border border-[#EAE3DC] mb-12">
+                <div class="grid md:grid-cols-2 gap-10 items-start">
+                    <div>
+                        <h4 class="text-xl font-semibold text-center mb-4">So Sánh Giá Bán (triệu VND/m²)</h4>
+                        <div class="chart-container h-[400px]">
+                            <canvas id="priceComparisonChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-center mb-4">Chính Sách Thanh Toán & Ưu Đãi</h4>
+                        <div class="flex justify-center space-x-2 mb-4">
+                            <button class="btn-policy active px-4 py-2 rounded-full text-sm font-medium bg-[#EAE3DC]" data-policy="policy1">Thanh toán 35%</button>
+                            <button class="btn-policy px-4 py-2 rounded-full text-sm font-medium bg-[#EAE3DC]" data-policy="policy2">Hỗ trợ Lãi suất</button>
+                            <button class="btn-policy px-4 py-2 rounded-full text-sm font-medium bg-[#EAE3DC]" data-policy="policy3">Cam kết Thuê lại</button>
+                        </div>
+                        <div id="policy-content" class="bg-[#F8F5F2] p-6 rounded-lg min-h-[220px]">
+                            <div class="policy-details" id="policy1">
+                                <h5 class="font-bold text-lg mb-2">Thanh toán 35% nhận nhà</h5>
+                                <p class="text-[#7A7773]">Khách hàng chỉ cần thanh toán 35% giá trị là có thể nhận nhà ngay. Chính sách thanh toán nhanh còn được hưởng chiết khấu đặc biệt lên tới 16%.</p>
+                            </div>
+                            <div class="policy-details hidden" id="policy2">
+                                <h5 class="font-bold text-lg mb-2">Hỗ trợ Lãi suất & Ân hạn Gốc</h5>
+                                <p class="text-[#7A7773]">Chủ đầu tư hỗ trợ lãi suất (HTLS) và ân hạn nợ gốc (AHNG) cho các khoản vay ngân hàng lên đến 18 tháng, giúp giảm áp lực tài chính cho người mua trong giai đoạn đầu.</p>
+                            </div>
+                            <div class="policy-details hidden" id="policy3">
+                                <h5 class="font-bold text-lg mb-2">Cam kết Thuê lại & Lợi nhuận</h5>
+                                <p class="text-[#7A7773]">Chương trình cam kết thuê lại với tổng giá trị lên đến 600 triệu đồng trong 12 tháng. Đảm bảo tỷ suất lợi nhuận cho thuê hấp dẫn, lên đến 9%/năm.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 md:p-12 rounded-2xl border border-[#EAE3DC]">
+                <h4 class="text-2xl font-bold text-center mb-8">Công Cụ Ước Tính Tài Chính</h4>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="apartmentPrice" class="block text-sm font-medium text-[#7A7773]">Giá trị căn hộ (tỷ VND)</label>
+                            <input type="number" id="apartmentPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#C8A464] focus:ring-[#C8A464] sm:text-sm p-2" placeholder="Ví dụ: 10.8">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[#7A7773]">Chọn chính sách thanh toán</label>
+                            <div class="mt-2 space-y-2">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" class="form-radio text-[#C8A464] focus:ring-[#C8A464]" name="paymentOption" value="35" checked>
+                                    <span class="ml-2">Thanh toán 35% nhận nhà</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" class="form-radio text-[#C8A464] focus:ring-[#C8A464]" name="paymentOption" value="bank">
+                                    <span class="ml-2">Vay ngân hàng 70% (HTLS 18 tháng)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button id="calculateBtn" class="w-full bg-[#C8A464] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#A68A5A] transition-colors">Tính toán</button>
+                    </div>
+                    <div id="calculationResult" class="bg-[#F8F5F2] p-6 rounded-lg">
+                        <h5 class="font-bold text-lg mb-4">Kết quả ước tính</h5>
+                        <p class="text-[#7A7773]">Vui lòng nhập giá trị căn hộ và nhấn "Tính toán" để xem kết quả.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="swot" class="scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Đánh Giá Toàn Diện & Khuyến Nghị</h3>
+            <p class="text-center text-[#7A7773] mb-10 max-w-3xl mx-auto">Tổng hợp các điểm mạnh, điểm yếu, cơ hội và thách thức của dự án để đưa ra những khuyến nghị cuối cùng cho nhà đầu tư và người mua để ở.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+                <div>
+                    <h4 class="text-xl font-semibold text-center mb-4">Hồ Sơ Rủi Ro & Lợi Nhuận</h4>
+                    <div class="chart-container h-[350px] md:h-[400px]">
+                        <canvas id="riskRewardChart"></canvas>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                     <div class="bg-white p-4 rounded-lg border border-green-200">
+                        <h4 class="font-bold text-lg text-green-700 mb-2">Điểm Mạnh</h4>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-[#7A7773]">
+                            <li>Vị trí "kim cương"</li>
+                            <li>Tính khan hiếm</li>
+                            <li>Pháp lý (sổ hồng)</li>
+                            <li>Đối tác danh tiếng</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <h4 class="font-bold text-lg text-red-700 mb-2">Điểm Yếu</h4>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-[#7A7773]">
+                            <li>Rủi ro CĐT</li>
+                            <li>Giá bán cao</li>
+                            <li>Cấu trúc hỗn hợp</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-lg text-blue-700 mb-2">Cơ Hội</h4>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-[#7A7773]">
+                            <li>Hưởng lợi Metro 3A</li>
+                            <li>Nguồn cung khan hiếm</li>
+                            <li>Chính sách hấp dẫn</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-yellow-200">
+                        <h4 class="font-bold text-lg text-yellow-700 mb-2">Thách Thức</h4>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-[#7A7773]">
+                            <li>Kinh tế vĩ mô</li>
+                            <li>Cạnh tranh</li>
+                            <li>Áp lực thanh khoản</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-[#EAE3DC]/50 p-6 rounded-lg">
+                    <h4 class="font-bold text-xl mb-3">Khuyến nghị cho Nhà đầu tư</h4>
+                    <p class="text-[#7A7773]"><span class="font-semibold text-[#3D3B38]">Chiến lược:</span> Cân nhắc đầu tư dài hạn (5-10 năm) để hưởng lợi từ hạ tầng Metro. Tận dụng chính sách cam kết thuê lại để đảm bảo dòng tiền trong ngắn hạn.</p>
+                    <p class="text-[#7A7773] mt-2"><span class="font-semibold text-[#3D3B38]">Hành động:</span> Yêu cầu đầy đủ hồ sơ pháp lý, đặc biệt là các văn bản liên quan đến "sổ hồng sẵn sàng". Đàm phán chặt chẽ các điều khoản hợp đồng về tiến độ và chất lượng.</p>
+                </div>
+                 <div class="bg-[#EAE3DC]/50 p-6 rounded-lg">
+                    <h4 class="font-bold text-xl mb-3">Khuyến nghị cho Người mua để ở</h4>
+                    <p class="text-[#7A7773]"><span class="font-semibold text-[#3D3B38]">Đánh giá:</span> Lựa chọn lý tưởng về một nơi an cư đẳng cấp, riêng tư. Cần chuẩn bị tâm lý cho rủi ro về tiến độ (nếu có).</p>
+                    <p class="text-[#7A7773] mt-2"><span class="font-semibold text-[#3D3B38]">Hành động:</span> Tận dụng tối đa chính sách thanh toán 35% và các gói chiết khấu. Làm rõ cơ chế vận hành, phân luồng giữa khu căn hộ và văn phòng. Yêu cầu danh mục vật liệu bàn giao chi tiết.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white mt-16">
+        <div class="container mx-auto px-6 py-6 text-center text-[#7A7773]">
+            <p>&copy; 2025. Báo cáo phân tích tương tác được tạo cho dự án Kiều by KITA Group by Trọng Khải 0902 79 8800.</p>
+            <p class="text-xs mt-1">Thông tin trong báo cáo này được tổng hợp từ các nguồn công khai và chỉ mang tính chất tham khảo.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartFontColor = '#3D3B38';
+
+            const productMixData = {
+                labels: ['3-4 Phòng ngủ (50 căn)', '2 Phòng ngủ (20 căn)', 'Duplex (8 căn)', 'Penthouse (4 căn)'],
+                datasets: [{
+                    label: 'Số lượng căn hộ',
+                    data: [50, 20, 8, 4],
+                    backgroundColor: ['#C8A464', '#A68A5A', '#EAE3DC', '#3D3B38'],
+                    borderColor: '#F8F5F2',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            };
+            new Chart(document.getElementById('productMixChart'), {
+                type: 'doughnut',
+                data: productMixData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: chartFontColor, font: { family: "'Inter', sans-serif" } } }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw} căn` } } }
+                }
+            });
+
+            const priceComparisonData = {
+                labels: ['Kiều by KITA', 'The EverRich Infinity', 'Dragon Riverside City'],
+                datasets: [{ label: 'Giá bán cao nhất (triệu/m²)', data: [180, 118, 65], backgroundColor: '#A68A5A', borderRadius: 4 }, { label: 'Giá bán thấp nhất (triệu/m²)', data: [150, 80, 60], backgroundColor: '#C8A464', borderRadius: 4 }]
+            };
+            new Chart(document.getElementById('priceComparisonChart'), {
+                type: 'bar',
+                data: priceComparisonData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { color: chartFontColor }, grid: { color: '#EAE3DC' } }, x: { ticks: { color: chartFontColor }, grid: { display: false } } },
+                    plugins: { legend: { position: 'bottom', labels: { color: chartFontColor } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.formattedValue} triệu/m²` } } }
+                }
+            });
+
+            const riskRewardData = {
+                labels: ['Vị trí', 'Tiềm năng Tăng giá', 'Chất lượng Tiện ích', 'Rủi ro CĐT', 'Giá bán / Cạnh tranh', 'Tính thanh khoản'],
+                datasets: [{
+                    label: 'Hồ sơ Dự án Kiều',
+                    data: [9, 8, 8, 5, 6, 6],
+                    fill: true,
+                    backgroundColor: 'rgba(200, 164, 100, 0.2)',
+                    borderColor: '#C8A464',
+                    pointBackgroundColor: '#C8A464',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#C8A464'
+                }]
+            };
+            new Chart(document.getElementById('riskRewardChart'), {
+                type: 'radar',
+                data: riskRewardData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 10, ticks: { display: false }, pointLabels: { color: chartFontColor } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            
+            const policyButtons = document.querySelectorAll('.btn-policy');
+            const policyContents = document.querySelectorAll('.policy-details');
+            policyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    policyButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const policyId = button.dataset.policy;
+                    policyContents.forEach(content => {
+                        content.classList.toggle('hidden', content.id !== policyId);
+                    });
+                });
+            });
+            
+            const calculateBtn = document.getElementById('calculateBtn');
+            calculateBtn.addEventListener('click', () => {
+                const price = parseFloat(document.getElementById('apartmentPrice').value);
+                const option = document.querySelector('input[name="paymentOption"]:checked').value;
+                const resultDiv = document.getElementById('calculationResult');
+                
+                if (isNaN(price) || price <= 0) {
+                    resultDiv.innerHTML = `<h5 class="font-bold text-lg mb-4">Kết quả ước tính</h5><p class="text-red-500">Vui lòng nhập giá trị căn hộ hợp lệ.</p>`;
+                    return;
+                }
+
+                let html = `<h5 class="font-bold text-lg mb-4">Kết quả ước tính cho căn hộ ${price} tỷ VND</h5>`;
+                const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+
+                if (option === '35') {
+                    const initialPayment = price * 1e9 * 0.35;
+                    const remaining = price * 1e9 * 0.65;
+                    const monthlyPayment = remaining / 36;
+                    html += `<ul class="space-y-2 text-[#7A7773]">
+                                <li><strong>Thanh toán ban đầu (35%):</strong> <span class="font-semibold text-[#3D3B38]">${formatter.format(initialPayment)}</span></li>
+                                <li><strong>Số tiền trả góp CĐT (65%):</strong> <span class="font-semibold text-[#3D3B38]">${formatter.format(remaining)}</span></li>
+                                <li><strong>Trả góp mỗi tháng (trong 36 tháng):</strong> <span class="font-semibold text-[#3D3B38]">${formatter.format(monthlyPayment)}</span></li>
+                             </ul>`;
+                } else if (option === 'bank') {
+                    const initialPayment = price * 1e9 * 0.30;
+                    const loanAmount = price * 1e9 * 0.70;
+                     html += `<ul class="space-y-2 text-[#7A7773]">
+                                <li><strong>Vốn tự có (30%):</strong> <span class="font-semibold text-[#3D3B38]">${formatter.format(initialPayment)}</span></li>
+                                <li><strong>Số tiền vay ngân hàng (70%):</strong> <span class="font-semibold text-[#3D3B38]">${formatter.format(loanAmount)}</span></li>
+                                <li class="text-sm italic">Trong 18 tháng đầu, bạn được CĐT hỗ trợ lãi suất và ân hạn nợ gốc. Sau đó, bạn sẽ bắt đầu trả cả gốc và lãi theo chính sách của ngân hàng.</li>
+                             </ul>`;
+                }
+                resultDiv.innerHTML = html;
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section[id]');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            function updateActiveLink() {
+                let index = sections.length;
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                navLinks.forEach((link) => link.classList.remove('active'));
+                if (index >= 0 && navLinks[index]) {
+                   navLinks[index].classList.add('active');
+                }
+            }
+
+            window.addEventListener('scroll', updateActiveLink);
+            updateActiveLink();
+
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                document.querySelector(targetId)?.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
